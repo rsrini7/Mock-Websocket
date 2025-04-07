@@ -2,6 +2,7 @@ package com.example.springstockserver.handler;
 
 import com.example.springstockserver.model.StockData;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
@@ -11,6 +12,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.*;
 
+@Slf4j
 public class StockWebSocketHandler extends TextWebSocketHandler {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -22,7 +24,7 @@ public class StockWebSocketHandler extends TextWebSocketHandler {
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) {
-        System.out.println("Client connected: " + session.getId());
+        log.info("Client connected: {}", session.getId());
         activeSessions.put(session.getId(), session);
 
         Runnable sendStockDataTask = () -> {
@@ -37,7 +39,7 @@ public class StockWebSocketHandler extends TextWebSocketHandler {
                     stopSessionTask(session);
                 }
             } catch (IOException e) {
-                System.err.println("Error sending message to client " + session.getId() + ": " + e.getMessage());
+                log.error("Error sending message to client {}: {}", session.getId(), e.getMessage());
                 stopSessionTask(session);
             }
         };
@@ -52,14 +54,14 @@ public class StockWebSocketHandler extends TextWebSocketHandler {
 
     @Override
     public void handleTransportError(WebSocketSession session, Throwable exception) {
-        System.err.println("Transport error for session " + session.getId() + ": " + exception.getMessage());
+        log.error("Transport error for session {}: {}", session.getId(), exception.getMessage());
         stopSessionTask(session);
         closeSessionQuietly(session);
     }
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
-        System.out.println("Client disconnected: " + session.getId() + " with status: " + status);
+        log.info("Client disconnected: {} with status: {}", session.getId(), status);
         stopSessionTask(session);
         activeSessions.remove(session.getId());
     }
@@ -77,7 +79,7 @@ public class StockWebSocketHandler extends TextWebSocketHandler {
                 session.close();
             }
         } catch (IOException e) {
-            System.err.println("Error closing session: " + e.getMessage());
+            log.error("Error closing session: {}", e.getMessage());
         }
     }
 
