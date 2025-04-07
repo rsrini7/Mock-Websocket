@@ -3,7 +3,7 @@ import { StockData } from './src/types';
 
 const wss = new WebSocketServer({ port: 8080 });
 
-const symbols = ['AAPL', 'GOOGL', 'MSFT', 'AMZN', 'FB'];
+const symbols = ["AAPL", "GOOGL", "MSFT", "AMZN", "FB", "TSLA", "NFLX", "NVDA"];
 
 function generateStockData(): StockData[] {
   return symbols.map(symbol => ({
